@@ -6,10 +6,20 @@
 // PURPOSE: Arduino Library for external I2C EEPROM 24LC256 et al.
 //     URL: https://github.com/RobTillaart/I2C_EEPROM
 
+// #define INCOMMING
+#define NEW
+// #define ORIGINAL
 
+// ###########################################################################################
+
+#ifdef ORIGINAL
 #include "Arduino.h"
+#endif
 #include "Wire.h"
 
+#ifdef NEW
+#include "TimerControl.h"
+#endif
 
 #define I2C_EEPROM_VERSION          (F("1.9.2"))
 
@@ -66,7 +76,12 @@ public:
   /**
     * Initializes the EEPROM with a default deviceSize of I2C_DEVICESIZE_24LC256  (32K EEPROM)
     */
+  #ifdef ORIGINAL
   I2C_eeprom(const uint8_t deviceAddress, TwoWire *wire = &Wire);
+  #endif
+  #ifdef NEW
+  I2C_eeprom(const uint8_t deviceAddress, TwoWire *wire, TimerControl *timer);
+  #endif
 
   /**
     * Initializes the EEPROM for the given device address.
@@ -77,7 +92,12 @@ public:
     * @param deviceSize    Max size in bytes of the device (divide your device size in Kbits by 8)
     * @param wire          Select alternative Wire interface
     */
+  #ifdef ORIGINAL
   I2C_eeprom(const uint8_t deviceAddress, const uint32_t deviceSize, TwoWire *wire = &Wire);
+  #endif
+  #ifdef NEW
+  I2C_eeprom(const uint8_t deviceAddress, const uint32_t deviceSize, TwoWire *wire, TimerControl *timer);
+  #endif
 
   //  use default I2C pins.
   bool     begin(int8_t writeProtectPin = -1);
