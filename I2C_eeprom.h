@@ -6,15 +6,42 @@
 // PURPOSE: Arduino Library for external I2C EEPROM 24LC256 et al.
 //     URL: https://github.com/RobTillaart/I2C_EEPROM
 
+// ##################################################################################
+
 // #define INCOMMING
 #define NEW
 // #define ORIGINAL
 
+#ifdef NEW
+// ####################################################################################
+// Define the target MCU family here
+// Uncomment the desired MCU family definition below:
+
+// #define STM32F4
+#define STM32F1
+// #define STM32H7
+
+// ##################################################################################
+// Include libraries:
+
+#if defined(STM32F1)
+#include "stm32f1xx_hal.h"      // HAL library for STM32F1 series
+#elif defined(STM32F4)
+#include "stm32f4xx_hal.h"      // HAL library for STM32F4 series
+#elif defined(STM32H7)
+#include "stm32h7xx_hal.h"      // HAL library for STM32H7 series
+#else
+#error "Unsupported MCU family. Please define a valid target (e.g., STM32F1, STM32F4, STM32H7)."
+#endif
+
+#include <string>       // Include the standard string library for error handling and messages
+
 // ###########################################################################################
+#endif
 
 #ifdef ORIGINAL
 #include "Arduino.h"
-#endif
+#endif 
 #include "Wire.h"
 
 #ifdef NEW
@@ -201,6 +228,10 @@ private:
   void     _waitEEReady();
 
   TwoWire * _wire;
+
+  #ifdef NEW
+  TimerControl * _timer;
+  #endif
 
   bool     _debug = false;
 

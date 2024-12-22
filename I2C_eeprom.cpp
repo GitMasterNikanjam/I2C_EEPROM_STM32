@@ -35,12 +35,20 @@
 //
 //  PUBLIC FUNCTIONS
 //
+#ifdef ORIGINAL
 I2C_eeprom::I2C_eeprom(const uint8_t deviceAddress, TwoWire * wire) :
             I2C_eeprom(deviceAddress, I2C_DEVICESIZE_24LC256, wire)
 {
 }
+#endif
+#ifdef NEW
+I2C_eeprom::I2C_eeprom(const uint8_t deviceAddress, TwoWire * wire, TimerControl * timer) :
+            I2C_eeprom(deviceAddress, I2C_DEVICESIZE_24LC256, wire, timer)
+{
+}
+#endif
 
-
+#ifdef ORIGINAL
 I2C_eeprom::I2C_eeprom(const uint8_t deviceAddress, const uint32_t deviceSize, TwoWire * wire)
 {
   _deviceAddress = deviceAddress;
@@ -51,6 +59,20 @@ I2C_eeprom::I2C_eeprom(const uint8_t deviceAddress, const uint32_t deviceSize, T
   //  Chips 16 Kbit (2048 Bytes) or smaller only have one-word addresses.
   this->_isAddressSizeTwoWords = deviceSize > I2C_DEVICESIZE_24LC16;
 }
+#endif
+#ifdef NEW
+I2C_eeprom::I2C_eeprom(const uint8_t deviceAddress, const uint32_t deviceSize, TwoWire * wire, TimerControl * timer)
+{
+  _deviceAddress = deviceAddress;
+  _deviceSize = setDeviceSize(deviceSize);
+  _pageSize = getPageSize(_deviceSize);
+  _wire = wire;
+  _timer = timer;
+
+  //  Chips 16 Kbit (2048 Bytes) or smaller only have one-word addresses.
+  this->_isAddressSizeTwoWords = deviceSize > I2C_DEVICESIZE_24LC16;
+}
+#endif
 
 
 bool I2C_eeprom::begin(int8_t writeProtectPin)
@@ -58,12 +80,14 @@ bool I2C_eeprom::begin(int8_t writeProtectPin)
   //  if (_wire == 0) SPRNL("zero");  //  test #48
   _lastWrite = 0;
   _writeProtectPin = writeProtectPin;
+  #ifdef INCOMMING
   if (_writeProtectPin >= 0)
   {
     _autoWriteProtect = EN_AUTO_WRITE_PROTECT;
     pinMode(_writeProtectPin, OUTPUT);
     preventWrite();
   }
+  #endif
   return isConnected();
 }
 
@@ -234,22 +258,42 @@ bool I2C_eeprom::writeBlockVerify(const uint16_t memoryAddress, const uint8_t * 
 bool I2C_eeprom::setBlockVerify(const uint16_t memoryAddress, const uint8_t value, const uint16_t length)
 {
   if (setBlock(memoryAddress, value, length) != 0) return false;
+  #ifdef ORIGINAL
   uint8_t * data = (uint8_t *) malloc(length);
+  #endif
+  #ifdef NEW
+  uint8_t * data = new (uint8_t)(length);
+  #endif
   if (data == NULL) return false;
   if (readBlock(memoryAddress, data, length) != length)
   {
+    #ifdef ORIGINAL
     free(data);
+    #endif
+    #ifdef NEW
+    delete data;
+    #endif
     return false;
   }
   for (uint16_t i = 0; i < length; i++)
   {
     if (data[i] != value)
     {
+      #ifdef ORIGINAL
       free(data);
+      #endif
+      #ifdef NEW
+      delete data;
+      #endif
       return false;
     }
   }
+  #ifdef ORIGINAL
   free(data);
+  #endif
+  #ifdef NEW
+  delete data;
+  #endif
   return true;
 }
 
@@ -356,8 +400,14 @@ uint32_t I2C_eeprom::determineSizeNoWrite()
   bool isModifiedFirstSector = false;
   bool dataIsDifferent = false;
 
+  #ifdef ORIGINAL
   byte dataFirstBytes[BUFSIZE];
   byte dataMatch[BUFSIZE];
+  #endif
+  #ifdef NEW
+  uint8_t dataFirstBytes[BUFSIZE];
+  uint8_t dataMatch[BUFSIZE];
+  #endif
   readBlock(0, dataFirstBytes, BUFSIZE);
 
   for (uint8_t pos = 0; pos < BUFSIZE; pos++)
@@ -404,7 +454,13 @@ uint32_t I2C_eeprom::determineSizeNoWrite()
     //  Try to read last byte of the block, should return length of 0 when fails for single byte devices
     //  Will return the same dataFirstBytes as initially read on other devices 
     //  as the data pointer could not be moved to the requested position
+    #ifdef ORIGINAL
     delay(2);
+    #endif
+    #ifdef NEW
+      HAL_Delay(2);
+    #endif
+
     uint16_t bSize = readBlock(size, dataMatch, BUFSIZE);
 
     if (bSize == BUFSIZE && memcmp(dataFirstBytes, dataMatch, BUFSIZE) != 0)
@@ -512,19 +568,23 @@ bool I2C_eeprom::hasWriteProtectPin()
 
 void I2C_eeprom::allowWrite()
 {
+  #ifdef INCOMMING
   if (hasWriteProtectPin())
   {
     digitalWrite(_writeProtectPin, LOW);
   }
+  #endif
 }
 
 
 void I2C_eeprom::preventWrite()
 {
+  #ifdef INCOMMING
   if (hasWriteProtectPin())
   {
     digitalWrite(_writeProtectPin, HIGH);
   }
+  #endif
 }
 
 
@@ -600,23 +660,32 @@ void I2C_eeprom::_beginTransmission(const uint16_t memoryAddress)
 int I2C_eeprom::_WriteBlock(const uint16_t memoryAddress, const uint8_t * buffer, const uint16_t length)
 {
   _waitEEReady();
+  #ifdef INCOMMING
   if (_autoWriteProtect)
   {
     digitalWrite(_writeProtectPin, LOW);
   }
+  #endif
 
   this->_beginTransmission(memoryAddress);
   _wire->write(buffer, length);
   int rv = _wire->endTransmission();
 
+  #ifdef INCOMMING
   if (_autoWriteProtect)
   {
     digitalWrite(_writeProtectPin, HIGH);
   }
+  #endif
 
+  #ifdef ORIGINAL
   _lastWrite = micros();
 
   yield();     // For OS scheduling
+  #endif
+  #ifdef NEW
+  _lastWrite = _timer->micros();
+  #endif
 
 //  if (rv != 0)
 //  {
@@ -664,7 +733,9 @@ uint8_t I2C_eeprom::_ReadBlock(const uint16_t memoryAddress, uint8_t * buffer, c
     uint8_t address = _deviceAddress | ((memoryAddress >> 8) & 0x07);
     readBytes = _wire->requestFrom((int)address, (int)length);
   }
+  #ifdef ORIGINAL
   yield();     //  For OS scheduling
+  #endif
   uint8_t count = 0;
   while (count < readBytes)
   {
@@ -705,7 +776,9 @@ bool I2C_eeprom::_verifyBlock(const uint16_t memoryAddress, const uint8_t * buff
     uint8_t address = _deviceAddress | ((memoryAddress >> 8) & 0x07);
     readBytes = _wire->requestFrom((int)address, (int)length);
   }
+  #ifdef ORIGINAL
   yield();     //  For OS scheduling
+  #endif
   uint8_t count = 0;
   while (count < readBytes)
   {
@@ -724,6 +797,7 @@ void I2C_eeprom::_waitEEReady()
   //  this is a bit faster than the hardcoded 5 milliSeconds
   //  TWR = WriteCycleTime
   uint32_t waitTime = I2C_WRITEDELAY + _extraTWR * 1000UL;
+  #ifdef ORIGINAL
   while ((micros() - _lastWrite) <= waitTime)
   {
     if (isConnected()) return;
@@ -733,6 +807,13 @@ void I2C_eeprom::_waitEEReady()
     // if (x == 0) return;
     yield();     //  For OS scheduling
   }
+  #endif
+  #ifdef NEW
+  while ((_timer->micros() - _lastWrite) <= waitTime)
+  {
+    if (isConnected()) return;
+  }
+  #endif
   return;
 }
 

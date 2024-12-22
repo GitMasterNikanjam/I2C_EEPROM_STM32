@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xB</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;..\..\..\libraries\Wire_STM32;..\..\..\..\I2C_EEPROM_STM32</IncludePath>
+              <IncludePath>../Core/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc;../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F1xx/Include;../Drivers/CMSIS/Include;../../../libraries/Wire_STM32;../../../../I2C_EEPROM_STM32;../../../libraries/TimerControl_STM32</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -513,6 +513,16 @@
               <FileName>I2C_eeprom.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\..\..\I2C_eeprom.cpp</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Libraries/TimerControl</GroupName>
+          <Files>
+            <File>
+              <FileName>TimerControl.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\..\..\libraries\TimerControl_STM32\TimerControl.cpp</FilePath>
             </File>
           </Files>
         </Group>
