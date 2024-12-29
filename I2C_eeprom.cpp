@@ -231,7 +231,6 @@ uint16_t I2C_eeprom::updateBlock(const uint16_t memoryAddress, const uint8_t * b
   return bytes;
 }
 
-
 /////////////////////////////////////////////////////////////
 //
 //  VERIFY SECTION

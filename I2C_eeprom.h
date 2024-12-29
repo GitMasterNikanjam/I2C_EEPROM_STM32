@@ -1,10 +1,7 @@
 #pragma once
 //
 //    FILE: I2C_eeprom.h
-//  AUTHOR: Rob Tillaart
-// VERSION: 1.9.2
-// PURPOSE: Arduino Library for external I2C EEPROM 24LC256 et al.
-//     URL: https://github.com/RobTillaart/I2C_EEPROM
+//  AUTHOR: Mohammad Nikanjam rewrite Rob Tillaart code VERSION: 1.9.2 for STM32 with HAL functions.
 
 // ##################################################################################
 
@@ -17,8 +14,8 @@
 // Define the target MCU family here
 // Uncomment the desired MCU family definition below:
 
-// #define STM32F4
-#define STM32F1
+#define STM32F4
+// #define STM32F1
 // #define STM32H7
 
 // ##################################################################################
@@ -158,7 +155,6 @@ public:
   //  test your performance gains!
   //  returns bytes actually written <= length
   uint16_t updateBlock(const uint16_t memoryAddress, const uint8_t * buffer, const uint16_t length);
-
 
   //  same functions as above but with verify
   //  return false if write or verify failed.

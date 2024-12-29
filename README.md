@@ -1,51 +1,16 @@
-
-[![Arduino CI](https://github.com/RobTillaart/I2C_EEPROM/workflows/Arduino%20CI/badge.svg)](https://github.com/marketplace/actions/arduino_ci)
-[![Arduino-lint](https://github.com/RobTillaart/I2C_EEPROM/actions/workflows/arduino-lint.yml/badge.svg)](https://github.com/RobTillaart/I2C_EEPROM/actions/workflows/arduino-lint.yml)
-[![JSON check](https://github.com/RobTillaart/I2C_EEPROM/actions/workflows/jsoncheck.yml/badge.svg)](https://github.com/RobTillaart/I2C_EEPROM/actions/workflows/jsoncheck.yml)
-[![GitHub issues](https://img.shields.io/github/issues/RobTillaart/I2C_EEPROM.svg)](https://github.com/RobTillaart/I2C_EEPROM/issues)
-
-[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/RobTillaart/I2C_EEPROM/blob/master/LICENSE)
-[![GitHub release](https://img.shields.io/github/release/RobTillaart/I2C_EEPROM.svg?maxAge=3600)](https://github.com/RobTillaart/I2C_EEPROM/releases)
-[![PlatformIO Registry](https://badges.registry.platformio.org/packages/robtillaart/library/I2C_EEPROM.svg)](https://registry.platformio.org/libraries/robtillaart/I2C_EEPROM)
-
-
-
 # I2C_EEPROM
 
-Arduino Library for external I2C EEPROM - 24LC512, 24LC256, 24LC64/32/16/08/04/02/01.
-
+- The base library is RobTillaart/I2C_EEPROM : https://github.com/RobTillaart/I2C_EEPROM.git
+- The base version library that used is 1.9.2
+- The base library was changed for STM32 MCUs.
+- This Library is for external I2C EEPROM - 24LC512, 24LC256, 24LC64/32/16/08/04/02/01.
+- This library used MohammadNikanjam/Wire.h and MohammadNikanjam/TimerControl.h libraries.
+- Uncomment the appropriate #define in header file for your STM32 family (e.g., #define STM32F4).
 
 ## Description
 
 This library is to access external I2C EEPROM up to 64KB (= 512 Kbit) in size.
 MicroChip 24LC512, 24LC256, 24LC64, 24LC32, 24LC16, 24LC08, 24LC04, 24LC02, 24LC01 and equivalents.
-
-Also confirmed working M24512-W, M24512-R, M24512-DF (See #68). 
-Not supported is the identification page functions.
-
-The **I2C_eeprom_cyclic_store** interface is documented [here](README_cyclic_store.md)
-
-
-### RP2040
-
-There are at least two boards modules for the RP2040 that use a different Wire libraries. 
-One from "Earle F. Philhower" and an "MBED" one. See issues #53 and #55 for details.
-
-In 1.7.3 defines are checked to select between these two and as far as tested this seems
-to solve the issue #53 while being backwards compatible.
-If a better solution is found, it will be implemented.
-
-
-### Breaking change
-
-Version 1.9.0 fixed a memory leak in **verifyBlock()**.
-
-Version 1.8.0 introduced a breaking change.
-You cannot set the pins in **begin()** any more.
-This reduces the dependency of processor dependent Wire implementations.
-The user has to call **Wire.begin()** and can optionally set the Wire pins 
-before calling **I2C_eeprom.begin()**.
-
 
 ### Related
 
@@ -65,7 +30,6 @@ before calling **I2C_eeprom.begin()**.
 Default address = 0x50 .. 0x57 depending on three address lines (A0, A1, A2).
 ```
 
-
 ## Interface
 
 ```cpp
@@ -77,12 +41,11 @@ https://github.com/RobTillaart/I2C_24LC1025
 
 Most important difference is 32 bit memory addresses.
 
-
 ### Constructor
 
-- **I2C_eeprom(uint8_t deviceAddress, TwoWire \*wire = &Wire)** constructor, 
+- **I2C_eeprom(const uint8_t deviceAddress, TwoWire \*wire, TimerControl \*timer)** constructor, 
 optional Wire interface.
-- **I2C_eeprom(uint8_t deviceAddress, uint32_t deviceSize, TwoWire \*wire = &Wire)** 
+- **I2C_eeprom(const uint8_t deviceAddress, const uint32_t deviceSize, TwoWire \*wire, TimerControl \*timer)** 
 constructor, with optional Wire interface.
 - **bool begin(uint8_t writeProtectPin = -1)** initializes the I2C bus with the default pins.
 Furthermore it checks if the deviceAddress is available on the I2C bus.
