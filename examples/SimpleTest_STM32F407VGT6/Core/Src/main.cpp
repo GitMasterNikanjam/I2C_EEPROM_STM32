@@ -18,10 +18,11 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "I2C_eeprom.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "Wire.h"
+#include "I2C_eeprom.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -116,8 +117,8 @@ int main(void)
 	{
 		while (1);
 	}
-
-  MyData data = {42, -32768, 125, "Sensor1"};
+/*
+  MyData data = {42, 324, 125, "Sensor1"};
 
   ee.updateBlock(0, reinterpret_cast<const uint8_t *>(&data), sizeof(MyData)); 
 
@@ -128,6 +129,9 @@ int main(void)
   ee.readBlock(0, reinterpret_cast<uint8_t *>(&retrievedData), sizeof(MyData));
 
   temp = retrievedData.temperature;
+	*/
+	ee.updateByte(1280000, 123);
+	temp = ee.determineSize();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -162,7 +166,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 4;
+  RCC_OscInitStruct.PLL.PLLM = 8;
   RCC_OscInitStruct.PLL.PLLN = 168;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
   RCC_OscInitStruct.PLL.PLLQ = 4;
